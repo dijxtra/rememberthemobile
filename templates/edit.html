@@ -1,0 +1,20 @@
+<html>
+<head>
+<style type="text/css">
+td.p1 {background-color:orange}
+td.p2 {background-color:blue}
+td.p3 {background-color:lightskyblue}
+</style>
+</head>
+<body>
+<input type="hidden" name="id" value="{{ task.id }}">
+<table border=1>
+<tr><td>Text</td><td><input type="text" name="text" value="{{ task.text }}"></td></tr>
+<tr><td>Due</td><td><input type="text" name="due" value="{{ task.longdue }}"></td></tr>
+<tr><td>Priority</td><td>{{ task.priority_widget.as_p }}</td></tr>
+<tr><td>List</td><td><input type="text" name="list" value="{{ task.list }}"></td></tr>
+<tr><td>Tags</td><td><input type="text" name="tags" value="{{ task.tags }}"></td></tr>
+<tr><td><input type="submit" value="edit"></td></tr>
+</table>
+</body>
+</html>

@@ -2,3 +2,5 @@
 *~
 secret.py
 settings.py
+manage.py
+database.sqlite

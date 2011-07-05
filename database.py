@@ -1,17 +1,22 @@
 from datetime import datetime, date
 from django.forms import Select, ChoiceField
 import pickle
+import example
+
+OUTPUT_FILE = 'data.pkl'
 
 class Task:
-    def __init__(self, i, t, l = None, d = None, r = None, te = None, ta = None, p = None):
-        self.id = i
-        self._text = t
-        self._list = l
-        self._due = d
-        self._repeat = r
-        self._time_estimate = te
-        self._tags = ta
-        self._priority = p
+#    def __init__(self, i, t, l = None, d = None, r = None, te = None, ta = None, p = None):
+    def __init__(self, taskseries):
+        task = taskseries.task
+        self.id = task.id
+        self._text = taskseries.name
+        self._list = None
+        self._due = None
+        self._repeat = None
+        self._time_estimate = None
+        self._tags = None
+        self._priority = task.priority
 
     def text(self):
         if self._text is None:
@@ -68,18 +73,54 @@ class Task:
         return ChoiceField(choices = [(0, ''), (1, '1'), (2, '2'), (3, '3')], widget = Select)
 
 def get(_id = None):
-    inp = open('data.pkl', 'rb')
+    inp = open(OUTPUT_FILE, 'rb')
     tasks = pickle.load(inp)
     inp.close()
     if _id is None:
         return tasks
     
     for task in tasks:
-        print task.id, _id
         if task.id == int(_id):
-            print "bingo"
             return task
     return None
+
+def get_web(date):
+    return example.get_date(date)
+
+def delete(_id):
+    inp = open(OUTPUT_FILE, 'rb')
+    tasks = pickle.load(inp)
+    inp.close()
+    
+    for task in tasks:
+        if task.id == int(_id):
+            tasks.remove(task)
+
+    output = open(OUTPUT_FILE, 'wb')
+    pickle.dump(tasks, output)
+    output.close()
+
+    return None
+
+def put(task):
+    inp = open(OUTPUT_FILE, 'rb')
+    tasks = pickle.load(inp)
+    inp.close()
+
+    id = 1
+    for t in tasks:
+        if t.id >= id:
+            id = t.id + 1
+
+    task.id = id
+    
+    tasks.append(task)
+
+    output = open(OUTPUT_FILE, 'wb')
+    pickle.dump(tasks, output)
+    output.close()
+    
+    return
 
 def init():
     tasks = []
@@ -88,7 +129,7 @@ def init():
     tasks.append(Task(3, "Task tri", None, None, None, None, None, 3))
     tasks.append(Task(4, "Task cetiri", None, None, None, None, None, None))
 
-    output = open('data.pkl', 'wb')
+    output = open(OUTPUT_FILE, 'wb')
 
     pickle.dump(tasks, output)
 

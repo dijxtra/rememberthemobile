@@ -2,7 +2,7 @@ from datetime import datetime, date
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 import datetime
-import example
+import database
 
 def index(request, date = None):
     if date is None:
@@ -11,7 +11,7 @@ def index(request, date = None):
         else:
             date = datetime.date.today()
             
-    tasks = example.get_date(date.strftime("%Y-%m-%d"))
+    tasks = database.get_date(date.strftime("%Y-%m-%d"))
 
 #    tasks = sorted(tasks, key = lambda task: task.priority)
     
@@ -32,7 +32,7 @@ def action(request):
 
 def add(request):
     text = request.POST['text']
-    example.add(text)
+    database.add(text)
     return redirect('home')
 
 def delete(request, id):

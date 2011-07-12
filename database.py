@@ -2,7 +2,6 @@ import secret
 from rtm import createRTM
 
 class Task:
-#    def __init__(self, i, t, l = None, d = None, r = None, te = None, ta = None, p = None):
     def __init__(self, taskseries):
         task = taskseries.task
         self.id = task.id
@@ -24,7 +23,7 @@ class Task:
 
     def due(self):
         if self._due is None:
-            return " "
+            return ''
 
         day = self._due.strftime("%d %b")
 
@@ -41,7 +40,7 @@ class Task:
 
     def longdue(self):
         if self._due is None:
-            return " "
+            return ''
 
         day = self._due.strftime("%Y-%m-%d")
 
@@ -67,6 +66,17 @@ class Task:
 
     def priority_widget(self):
         return ChoiceField(choices = [(0, ''), (1, '1'), (2, '2'), (3, '3')], widget = Select)
+
+    def toConsole(self):
+        retval = self.text()
+
+        if self.due() != '':
+            retval += ' ' + self.due()
+
+        if self.priority() != '':
+            retval += ' !' + self.priority()
+
+        return retval
 
 def get_date(date):
 

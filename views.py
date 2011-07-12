@@ -13,7 +13,7 @@ def index(request, date = None):
             
     tasks = database.get_date(date.strftime("%Y-%m-%d"))
 
-#    tasks = sorted(tasks, key = lambda task: task.priority)
+    tasks = sorted(tasks, key = lambda task: task.priority())
     
     head_days = ['today', '&larr;', date.strftime("%Y-%m-%d"), '&rarr;']
 
@@ -43,7 +43,7 @@ def search(request):
     return index(request,text)
 
 def edit(request, id):
-    return index(request)
+    return render_to_response('edit.html', {'id': id}, RequestContext(request))
 
 def postpone(request, id):
     return index(request)

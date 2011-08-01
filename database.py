@@ -1,10 +1,15 @@
 import secret
+from django import forms
 from rtm import createRTM
 
 class Task:
-    def __init__(self, taskseries):
-        task = taskseries.task
+    def __init__(self, tasklist, taskseries, task = None):
+        if task is None:
+            task = taskseries.task
+        
         self.id = task.id
+        self.series_id = taskseries.id
+        self.list_id = tasklist.id
         self._text = taskseries.name
         self._list = None
         self._due = None
@@ -65,7 +70,7 @@ class Task:
         return self._priority
 
     def priority_widget(self):
-        return ChoiceField(choices = [(0, ''), (1, '1'), (2, '2'), (3, '3')], widget = Select)
+        return forms.ChoiceField(choices = [(0, ''), (1, '1'), (2, '2'), (3, '3')], widget = forms.Select)
 
     def toConsole(self):
         retval = self.text()
@@ -90,11 +95,41 @@ def get_date(date):
             # XXX: taskseries *may* be a list
             if isinstance(l.taskseries, (list, tuple)):
                 for t in l.taskseries:
-                    tasks.append(Task(t))
+                    tasks.append(Task(l, t))
             else:
-                tasks.append(Task(l.taskseries))
+                tasks.append(Task(l, l.taskseries))
 
     return tasks
+
+def get_task(list_id, series_id, task_id):
+
+    rtm = createRTM(secret.API_KEY, secret.SHARED_SECRET, secret.TOKEN)
+
+    rspTasks = rtm.tasks.getList()
+    tasks = []
+    if hasattr(rspTasks.tasks, "list") and \
+        hasattr(rspTasks.tasks.list, "__getitem__"):
+        for l in rspTasks.tasks.list:
+            # XXX: taskseries *may* be a list
+            if not hasattr(l, "taskseries"):
+                continue
+            if isinstance(l.taskseries, (list, tuple)):
+                for taskserie in l.taskseries:
+                    if isinstance(taskserie.task, (list, tuple)):
+                        for task in taskserie.task:
+                            t = Task(l, taskserie, task)
+                            if t.list_id == list_id and t.series_id == series_id and t.id == task_id:
+                                return t
+                    else:
+                        t = Task(l, taskserie)
+                        if t.list_id == list_id and t.series_id == series_id and t.id == task_id:
+                            return t
+            else:
+                t = Task(l, l.taskseries)
+                if t.list_id == list_id and t.series_id == series_id and t.id == task_id:
+                    return t
+
+    return None
 
 def add(string):
     rtm = createRTM(secret.API_KEY, secret.SHARED_SECRET, secret.TOKEN)

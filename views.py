@@ -5,21 +5,26 @@ import datetime
 import database
 
 def index(request, date = None):
-    if date is None:
-        if "date" in request.session:
-            date = request.session["date"]
-        else:
-            date = datetime.date.today()
-            
-    tasks = database.get_date(date.strftime("%Y-%m-%d"))
+    date = datetime.date.today()
+
+    return day(request, date.year, date.month, date.day)
+
+def day(request, year, month, day):
+    date = str(year).zfill(2) + '-' + str(month).zfill(2) + '-' + str(day).zfill(2)
+    d = datetime.date(int(year), int(month), int(day))
+
+    pre = d - datetime.timedelta(days = 1)
+    today = datetime.date.today()
+    post = d + datetime.timedelta(days = 1)
+    
+    tasks = database.get_date(date)
 
     tasks = sorted(tasks, key = lambda task: task.priority())
     
-    head_days = ['today', '&larr;', date.strftime("%Y-%m-%d"), '&rarr;']
+    head_days = ['today', '&larr;', date, '&rarr;']
+    head_links = [today.strftime('/%Y/%m/%d/'), pre.strftime('/%Y/%m/%d/'), '', post.strftime('/%Y/%m/%d/')]
 
-    request.session["date"] = date
-    
-    d = {'tasks': tasks, 'head_days': head_days}
+    d = {'tasks': tasks, 'head_days': head_days, 'head_links': head_links}
     return render_to_response('index.html', d, RequestContext(request))
 
 def action(request):
@@ -42,13 +47,14 @@ def search(request):
     text = request.POST['text']
     return index(request,text)
 
-def edit(request, id):
-    return render_to_response('edit.html', {'id': id}, RequestContext(request))
+def edit(request, list_id, series_id, task_id):
+    task = database.get_task(list_id, series_id, task_id)
+    return render_to_response('edit.html', {'task': task}, RequestContext(request))
 
-def postpone(request, id):
+def postpone(request, list_id, series_id, task_id):
     return index(request)
 
-def complete(request, id):
+def complete(request, list_id, series_id, task_id):
     return index(request)
 
 def diff_day(request, sign):

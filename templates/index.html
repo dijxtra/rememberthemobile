@@ -11,9 +11,9 @@ td.p3 {background-color:lightskyblue}
 <form name="action" method="POST" action="{% url action %}">
 {% csrf_token %}
 <table border=1>
-<tr><td align='center' colspan=3><a href="{% url today %}">{{ head_days.0 }}</a> | <a href="{% url prev_day %}">{% autoescape off %}{{ head_days.1 }}{% endautoescape %}</a> | <b>{{ head_days.2 }}</b> | <a href="{% url next_day %}">{% autoescape off %}{{ head_days.3 }}{% endautoescape %}</a></td></tr>
+  <tr><td align='center' colspan=3><a href="{{ head_links.0 }}">{{ head_days.0 }}</a> | <a href="{{ head_links.1 }}">{% autoescape off %}{{ head_days.1 }}{% endautoescape %}</a> | <b>{{ head_days.2 }}</b> | <a href="{{ head_links.3 }}">{% autoescape off %}{{ head_days.3 }}{% endautoescape %}</a></td></tr>
 {% for task in tasks %}
-<tr><td class='p{{ task.priority }}'>&nbsp;</td><td><a href="{% url edit task.id %}">{{ task.text }}</a></td><td><a href="{% url complete task.id %}">c</a></td></tr>
+<tr><td class='p{{ task.priority }}'>&nbsp;</td><td><a href="{% url edit task.list_id task.series_id task.id %}">{{ task.text }}</a></td><td><a href="{% url postpone task.list_id task.series_id task.id %}">p</a> <a href="{% url complete task.list_id task.series_id task.id %}">c</a></td></tr>
 {% endfor %}
 <tr><td colspan=3><input type="text" name="text"></td></tr>
 <tr><td colspan=3><input type="submit" value="add" name="submit"><input type="submit" value="search" name="submit"></td></tr>

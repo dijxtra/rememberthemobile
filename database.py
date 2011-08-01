@@ -1,18 +1,23 @@
 import secret
 from django import forms
+from datetime import date, datetime
 from rtm import createRTM
 
 class Task:
-    def __init__(self, tasklist, taskseries, task = None):
+    def __init__(self, rtm, tasklist, taskseries, task = None):
         if task is None:
             task = taskseries.task
-        
+
+        self._rtm = rtm
         self.id = task.id
         self.series_id = taskseries.id
         self.list_id = tasklist.id
         self._text = taskseries.name
         self._list = None
-        self._due = None
+        if task.due == '':
+            self._due = None
+        else:
+            self._due = datetime.strptime(task.due, "%Y-%m-%dT%H:%M:%SZ")
         self._repeat = None
         self._time_estimate = None
         self._tags = None
@@ -49,10 +54,10 @@ class Task:
 
         day = self._due.strftime("%Y-%m-%d")
 
-        if  type(self._due) is datetime:
+        if type(self._due) is datetime:
             time = self._due.strftime(" %H:%M")
             return day + time
-        if  type(self._due) is date:
+        if type(self._due) is date:
             return day
 
         return self._due
@@ -83,6 +88,12 @@ class Task:
 
         return retval
 
+    def complete(self):
+        self._rtm.tasks.complete(timeline = self._rtm.timeline, list_id = self.list_id, taskseries_id = self.series_id, task_id = self.id)
+
+    def postpone(self):
+        self._rtm.tasks.postpone(timeline = self._rtm.timeline, list_id = self.list_id, taskseries_id = self.series_id, task_id = self.id)
+
 def get_date(date):
 
     rtm = createRTM(secret.API_KEY, secret.SHARED_SECRET, secret.TOKEN)
@@ -95,9 +106,9 @@ def get_date(date):
             # XXX: taskseries *may* be a list
             if isinstance(l.taskseries, (list, tuple)):
                 for t in l.taskseries:
-                    tasks.append(Task(l, t))
+                    tasks.append(Task(rtm, l, t))
             else:
-                tasks.append(Task(l, l.taskseries))
+                tasks.append(Task(rtm, l, l.taskseries))
 
     return tasks
 
@@ -117,15 +128,15 @@ def get_task(list_id, series_id, task_id):
                 for taskserie in l.taskseries:
                     if isinstance(taskserie.task, (list, tuple)):
                         for task in taskserie.task:
-                            t = Task(l, taskserie, task)
+                            t = Task(rtm, l, taskserie, task)
                             if t.list_id == list_id and t.series_id == series_id and t.id == task_id:
                                 return t
                     else:
-                        t = Task(l, taskserie)
+                        t = Task(rtm, l, taskserie)
                         if t.list_id == list_id and t.series_id == series_id and t.id == task_id:
                             return t
             else:
-                t = Task(l, l.taskseries)
+                t = Task(rtm, l, l.taskseries)
                 if t.list_id == list_id and t.series_id == series_id and t.id == task_id:
                     return t
 

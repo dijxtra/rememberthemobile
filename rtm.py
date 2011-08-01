@@ -85,6 +85,8 @@ class RTM(object):
         if token:
             self.authInfo.dataReceived('token', token)
 
+        self.timeline = self.timelines.create().timeline
+
     def _sign(self, params):
         "Sign the parameters with MD5 hash"
         pairs = ''.join(['%s%s' % (k,v) for k,v in sortedItems(params)])

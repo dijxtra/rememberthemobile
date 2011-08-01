@@ -52,10 +52,14 @@ def edit(request, list_id, series_id, task_id):
     return render_to_response('edit.html', {'task': task}, RequestContext(request))
 
 def postpone(request, list_id, series_id, task_id):
-    return index(request)
+    task = database.get_task(list_id, series_id, task_id)
+    task.postpone()
+    return redirect('home')
 
 def complete(request, list_id, series_id, task_id):
-    return index(request)
+    task = database.get_task(list_id, series_id, task_id)
+    task.complete()
+    return redirect('home')
 
 def diff_day(request, sign):
     if "date" in request.session:
